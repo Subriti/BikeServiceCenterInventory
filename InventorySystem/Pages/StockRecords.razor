@@ -1,0 +1,37 @@
+﻿@page "/stock-records"
+<nav class="navbar navbar-light bg-light justify-content-between">
+    <h1 class="navbar-brand mb-0 h1">Chart depicting the Inventory Items and Total Quantity taken out</h1>
+</nav>
+
+<div>
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+</div>
+
+@foreach (var item in keyValuePairs)
+{
+    <p>
+        ItemName: @item.Key <br />
+        TotalQuantity: @item.Value
+    </p>
+}
+
+@code {
+    [CascadingParameter]
+    private Dictionary<string,int> keyValuePairs { get; set; }
+    private string[] ItemNameList { get; set; }
+
+    protected override void OnInitialized()
+    {
+        keyValuePairs = InventoryLogService.GetTotalQuantityTakenOut();
+    }
+
+  
+    public List<ChartSeries> Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "United States", Data = new double[] { 40, 20, 25, 27, 46, 60, 48, 80, 15 } },
+        new ChartSeries() { Name = "Germany", Data = new double[] { 19, 24, 35, 13, 28, 15, 13, 16, 31 } },
+        new ChartSeries() { Name = "Sweden", Data = new double[] { 8, 6, 11, 13, 4, 16, 10, 16, 18 } },
+    };
+    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+}
+

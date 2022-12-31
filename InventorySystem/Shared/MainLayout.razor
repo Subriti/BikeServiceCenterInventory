@@ -1,0 +1,53 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+
+<div class="page">
+
+    @if (_globalState.CurrentUser != null)
+    {
+        <div class="sidebar">
+            <NavMenu Username="@_globalState.CurrentUser.Username" UserRole="@_globalState.CurrentUser.Role" LogoutHandler="LogoutHandler" />
+        </div>
+    }
+
+    <main>
+        <article class="content px-4">
+            <CascadingValue Value="@_globalState">
+                @Body
+            </CascadingValue>
+        </article>
+    </main>
+</div>
+
+@code {
+    private GlobalState _globalState = new();
+
+    protected override void OnInitialized()
+    {
+        UsersService.SeedUsers();
+
+        //checking if admin was logged in before the re-run of program
+        List<AdminLoginDetails> loginDetails = AdminLoginService.GetAll();
+        var lastUser = loginDetails.LastOrDefault();
+
+        var user = UsersService.GetById(lastUser.Id);
+        if (user.Role == Role.Admin)
+        {
+            if (lastUser.LoggedOut == "Unavailable")
+            {
+                _globalState.CurrentUser = user;
+                NavManager.NavigateTo("/inventory");
+            }
+        }
+    }
+
+    private void LogoutHandler()
+    {
+       if (_globalState.CurrentUser.Role == Role.Admin)
+        {
+            AdminLoginService.LogOut(_globalState.CurrentUser.Id);
+        }
+        _globalState.CurrentUser = null;
+        NavManager.NavigateTo("/loginPage");
+    }
+}

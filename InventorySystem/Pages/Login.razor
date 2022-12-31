@@ -1,0 +1,122 @@
+﻿@page "/login"
+@inject NavigationManager NavManager
+@*<div class="main">*@
+<div class="card text-white bg-dark mb-3">
+
+  <div class="row g-2">
+
+    <div class="col-md-5">
+            <!--<img src="images/profile_picture.png" style="height:150px; width:150px" class="img-fluid rounded-start" alt="Image">-->
+            <img src="images/Screenshot_20221222_105558.png"  class="img-fluid rounded-start" alt="Image">
+    </div>
+    <div class="col-md-1"/>
+    <div class="col-md-6 position-relative align-self-center">
+      <div class="card-body" style="float: right">
+        <p class="card-text">
+                    <div class="login-body">
+                        <div class="form-login">
+                            <form class="text-center" @onsubmit="LoginHandler">
+                                <h1 class="h3 mb-6 fw-normal">Login</h1>
+
+                                <div class="form-floating mb-3 text-black-50">
+                                    <input type="text" class="form-control username" @bind="_username" placeholder="Username" />
+                                    <label for="floatingInput">Username</label>
+                                </div>
+                                <div class="form-floating mb-3 text-black-50">
+                                    <input type="password" class="form-control password" @bind="_password" placeholder="Password" />
+                                    <label for="floatingPassword">Password</label>
+                                </div>
+                                @if (!string.IsNullOrEmpty(_errorMessage))
+                                {
+                                    <AlertMessage Type="danger" Message="@_errorMessage" />
+                                }
+                                <button class="w-100 btn btn-lg btn-primary" type="submit">
+                                    <span class="oi oi-account-login"></span> Login
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+        </p>
+        <br />
+        <br/>
+      </div>
+@*
+           @* <p class="card-text align-content-center" style="margin-top:430px"><small class="text-muted">Developed for a Bike Rental Company</small></p>*@
+    </div>
+
+  </div>
+</div>
+@*</div>*@
+
+
+@*<aside>
+<div class="login-body">
+    <div class="form-login">
+        <form class="text-center" @onsubmit="LoginHandler">
+            <img class="mb-4" src="/appicon.png" alt="" height="72">
+            <h1 class="h3 mb-3 fw-normal">Login</h1>
+
+            <div class="form-floating">
+                <input type="text" class="form-control username" @bind="_username" placeholder="Username" />
+                <label for="floatingInput">Username</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control password" @bind="_password" placeholder="Password" />
+                <label for="floatingPassword">Password</label>
+            </div>
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <AlertMessage Type="danger" Message="@_errorMessage" />
+            }
+            <button class="w-100 btn btn-lg btn-primary" type="submit">
+                <span class="oi oi-account-login"></span> Login
+            </button>
+        </form>
+    </div>
+</div>
+</aside>
+
+@*<aside style="width: fit-content; float: left ">
+    @*Images/img1.jpg" height="300" width= "300" />
+        @*<h1>Inventory Management System</h1>*@
+   @* <img src="../Resources/Images/img2.jpg" height="300" width= "300"/>
+</aside>*@
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private bool _showDefaultCredentials { get; set; }
+    private string _username { get; set; }
+    private string _password { get; set; }
+    private string _errorMessage = "";
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            var user = UsersService.Login(UsersService.SeedUsername, UsersService.SeedPassword);
+        }
+        catch { }
+
+        _globalState.CurrentUser = null;
+        _errorMessage = "";
+    }
+
+    private void LoginHandler()
+    {
+        try
+        {
+            _errorMessage = "";
+            _globalState.CurrentUser = UsersService.Login(_username, _password);
+            if (_globalState.CurrentUser != null)
+            {
+                NavManager.NavigateTo("/inventory");
+            }
+        }
+        catch (Exception e)
+        {
+            _errorMessage = e.Message;
+            Console.WriteLine(e);
+        }
+    }
+}

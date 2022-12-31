@@ -1,0 +1,245 @@
+﻿@page "/add-items"
+
+<nav class="navbar navbar-light bg-light justify-content-between">
+    <h1 class="navbar-brand mb-0 h1">Items</h1>
+    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
+        <span class="oi oi-plus" /> Add
+    </button>
+</nav>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <div class="d-flex">
+                    <input type="search" class="form-control search" placeholder="Search" @oninput="SearchTaskName" />
+                    <a class='btn text-@(_sortBy == "itemName" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("itemName")'>
+                        <span class='oi oi-sort-@(_sortBy == "itemName" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+            <th>
+                <div class="d-flex">
+                    Quantity
+                    <a class='btn text-@(_sortBy == "quantity" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("quantity")'>
+                        <span class='oi oi-sort-@(_sortBy == "quantity" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+
+            <th>
+                <div class="d-flex">
+                    Added At
+                    <a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("createdAt")'>
+                        <span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+            <th>
+                <div class="d-flex mb-3">
+                    Last Taken out on
+                </div>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            IEnumerable<Items> itemList = _items;
+            if (_sortBy == "itemName")
+            {
+                itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.ItemName) : itemList.OrderByDescending(t =>
+                t.ItemName);
+            }
+            else if (_sortBy == "quantity")
+            {
+                itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.Quantity) : itemList.OrderByDescending(t =>
+                t.Quantity);
+            }
+            else if (_sortBy == "createdAt")
+            {
+                itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.CreatedAt) : itemList.OrderByDescending(t =>
+                t.CreatedAt);
+            }
+
+
+            foreach (var itemItem in itemList)
+            {
+                <tr>
+                    <td>@itemItem.ItemName</td>
+                    <td>@itemItem.Quantity</td>
+                    <td>
+                        <p class="small mb-0">
+                            @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                        </p>
+                    </td>
+                    <td><p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p></td>
+                    <td>
+                        <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
+                            <span class="oi oi-pencil" /> Edit
+                        </button>
+                        <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
+                            <span class="oi oi-delete" /> Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@*  this in <td> @InventoryLogService.ItemLastTakenOut(@itemItem.ItemName)*@
+@if (_showEditItemDialog)
+{
+    <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
+        <div class="form-floating mb-3">
+            <input id="itemName" type="text" class="form-control" @bind="_itemModel.ItemName" placeholder="Item Name" />
+            <label for="itemName">Item Name</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input id="quantity" type="number" class="form-control" @bind="_itemModel.Quantity" placeholder="Quantity" />
+            <label for="quantity">Quantity</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_editItemErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
+        }
+        </ModalDialog>
+}
+
+@if (_showDeleteItemDialog)
+{
+    <ModalDialog Title="Delete Item" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
+        <p>Are you sure you want to delete <strong>@_deleteItem.ItemName</strong> item?</p>
+        @if (!string.IsNullOrEmpty(_deleteItemErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_deleteItemErrorMessage" />
+        }
+        </ModalDialog>
+}
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private bool _showEditItemDialog { get; set; }
+    private bool _showDeleteItemDialog { get; set; }
+    private List<Items> _items { get; set; }
+    private Items _deleteItem { get; set; }
+    private string _dialogTitle { get; set; }
+    private string _dialogOkLabel { get; set; }
+    private string _editItemErrorMessage { get; set; }
+    private string _deleteItemErrorMessage { get; set; }
+    private Items _itemModel { get; set; }
+    private string _sortBy = "createdAt";
+    private string _sortDirection = "ascending";
+
+    protected override void OnInitialized()
+    {
+        _items = ItemsService.GetAll();
+    }
+
+    private void SortByHandler(string sortByName)
+    {
+        if (_sortBy == sortByName)
+        {
+            _sortDirection = _sortDirection == "ascending" ? "descending" : "ascending";
+        }
+        else
+        {
+            _sortBy = sortByName;
+            _sortDirection = "ascending";
+        }
+    }
+
+    private void OpenAddItemDialog()
+    {
+        _dialogTitle = "Add Item";
+        _dialogOkLabel = "Add";
+        _itemModel = new Items();
+        _itemModel.Id = Guid.Empty;
+        _showEditItemDialog = true;
+    }
+
+    private void SearchTaskName(ChangeEventArgs e)
+    {
+        var searchTerm = e.Value.ToString();
+        if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
+        {
+            _items = ItemsService.GetAll().Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
+        }
+        else
+        {
+            _items = ItemsService.GetAll();
+        }
+    }
+
+    private void OpenEditItemDialog(Items editItem)
+    {
+        _dialogTitle = "Edit Item";
+        _dialogOkLabel = "Save";
+
+        _itemModel = editItem;
+
+        _showEditItemDialog = true;
+    }
+
+    private void OpenDeleteItemDialog(Items itemItem)
+    {
+        _deleteItem = itemItem;
+        _showDeleteItemDialog = true;
+    }
+
+    private void OnEditItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showEditItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _editItemErrorMessage = "";
+                if (_itemModel.Id == Guid.Empty)
+                {
+                    _items = ItemsService.Create(_globalState.CurrentUser.Id, _itemModel.ItemName, _itemModel.Quantity);
+                }
+                else
+                {
+                    _items = ItemsService.Update(_itemModel.Id, _itemModel.ItemName, _itemModel.Quantity);
+                }
+                _showEditItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _editItemErrorMessage = e.Message;
+            }
+        }
+    }
+    private void OnDeleteItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+
+            _showDeleteItemDialog = false;
+            _deleteItem = null;
+        }
+        else
+        {
+            try
+            {
+                _deleteItemErrorMessage = "";
+                _items = ItemsService.Delete(_deleteItem.Id);
+                _showDeleteItemDialog = false;
+                _deleteItem = null;
+            }
+            catch (Exception e)
+            {
+                _deleteItemErrorMessage = e.Message;
+            }
+        }
+    }
+}

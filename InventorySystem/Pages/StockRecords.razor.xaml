@@ -1,0 +1,23 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:InventorySystem"
+        xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts">
+    
+    <Grid>
+        <chart:SfCartesianChart>
+
+            <chart:SfCartesianChart.XAxes>
+                <chart:CategoryAxis />
+            </chart:SfCartesianChart.XAxes>
+
+            <chart:SfCartesianChart.YAxes>
+                <chart:NumericalAxis />
+            </chart:SfCartesianChart.YAxes>
+
+            <chart:ColumnSeries ItemsSource="{Binding Data}"
+						XBindingPath="XValue"
+						YBindingPath="YValue"/>
+
+        </chart:SfCartesianChart>
+    </Grid>
+</ContentPage>

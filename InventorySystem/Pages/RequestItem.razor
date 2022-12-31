@@ -1,0 +1,318 @@
+﻿<nav class="navbar navbar-light bg-light justify-content-between">
+    <h1 class="navbar-brand mb-0 h1">Requested Items</h1>
+    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
+        <span class="oi oi-plus" /> Add Details
+    </button>
+</nav>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <div class="d-flex">
+                    <input type="search" class="form-control search" placeholder="Search" @oninput="SearchTaskName" />
+                    <a class='btn text-@(_sortBy == "itemName" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("itemName")'>
+                        <span class='oi oi-sort-@(_sortBy == "itemName" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+            <th>
+                <div class="d-flex">
+                    Quantity
+                    <a class='btn text-@(_sortBy == "quantity" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("quantity")'>
+                        <span class='oi oi-sort-@(_sortBy == "quantity" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+
+            <th>
+                <div class="d-flex">
+                    Approved By
+                    <a class='btn text-@(_sortBy == "approvedBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("approvedBy")'>
+                        <span class='oi oi-sort-@(_sortBy == "approvedBy" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+
+            <th>
+                <div class="d-flex">
+                    Taken By
+                    <a class='btn text-@(_sortBy == "takenBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("takenBy")'>
+                        <span class='oi oi-sort-@(_sortBy == "takenBy" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+
+            <th>
+                <div class="d-flex">
+                    Taken out at
+                    <a class='btn text-@(_sortBy == "takenOutAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+                       @onclick='()=>SortByHandler("takenOutAt")'>
+                        <span class='oi oi-sort-@(_sortBy == "takenOutAt" ? _sortDirection : "ascending")' />
+                    </a>
+                </div>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            IEnumerable<InventoryLog> inventoryLog = _inventoryLog;
+            if (_sortBy == "itemName")
+            {
+                inventoryLog = _sortDirection == "ascending" ? inventoryLog.OrderBy(t => t.ItemName) : inventoryLog.OrderByDescending(t =>
+                t.ItemName);
+            }
+            else if (_sortBy == "quantity")
+            {
+                inventoryLog = _sortDirection == "ascending" ? inventoryLog.OrderBy(t => t.Quantity) : inventoryLog.OrderByDescending(t =>
+                t.Quantity);
+            }
+            else if (_sortBy == "approvedBy")
+            {
+                inventoryLog = _sortDirection == "ascending" ? inventoryLog.OrderBy(t => t.ApprovedBy) : inventoryLog.OrderByDescending(t =>
+                t.ApprovedBy);
+            }
+            else if (_sortBy == "takenBy")
+            {
+                inventoryLog = _sortDirection == "ascending" ? inventoryLog.OrderBy(t => t.TakenBy) : inventoryLog.OrderByDescending(t =>
+                t.TakenBy);
+            }
+            else if (_sortBy == "takenOutAt")
+            {
+                inventoryLog = _sortDirection == "ascending" ? inventoryLog.OrderBy(t => t.TakenOutAt) : inventoryLog.OrderByDescending(t =>
+                t.TakenOutAt);
+            }
+
+
+
+            foreach (var itemItem in _inventoryLog)
+            {
+                    <tr>
+                        <td>@itemItem.ItemName</td>
+                        <td>@itemItem.Quantity</td>
+                        <td>
+                            @{
+                                var approvedBy = UsersService.GetById(_globalState.CurrentUser.Id);
+                                        <span>
+                                            @(
+                                approvedBy == null ? "Unknown" : approvedBy.Username
+                                                )
+                                        </span>
+                            }
+                        </td>
+                        <td>@itemItem.TakenBy</td>
+                        <td>
+                            <p class="small mb-0">
+                                @itemItem.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
+                            </p>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
+                                <span class="oi oi-pencil" /> Edit
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
+                                <span class="oi oi-delete" /> Delete
+                            </button>
+                        </td>
+                    </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (_showEditItemDialog)
+{
+    <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
+        <form>
+        <div class="form-floating">
+            <EditForm Model="@_itemModel">
+                <InputSelect id="itemName" @bind-Value="_itemModel.ItemName" class="form-control">
+                    @foreach (var item in _items)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                </InputSelect>
+            </EditForm>
+            <input id="itemName" type="text" class="form-control" @bind="_logModel.ItemName" placeholder="Item Name" />
+            <label for="itemName">Item Name</label>
+        </div>
+       
+        <div class="form-floating">
+            <input id="quantity" type="number" class="form-control" @bind="_logModel.Quantity" placeholder="Quantity" />
+            <label for="quantity">Quantity</label>
+        </div>
+
+        <div class="form-floating">
+            <input id="takenBy" type="text" class="form-control" @bind="_logModel.TakenBy" placeholder="Taken By" />
+            <label for="takenBy">Taken By</label>
+        </div>
+
+
+            @if (!string.IsNullOrEmpty(_editItemErrorMessage))
+            {
+                <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
+            }
+        </form>
+    </ModalDialog>
+}
+
+@*@if (_showEditItemDialog)
+{
+    <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
+        <div class="form-floating">
+            <input id="itemName" type="text" class="form-control" @bind="_itemModel.ItemName" placeholder="Item Name" />
+            <label for="itemName">Item Name</label>
+        </div>
+        <div class="form-floating">
+            <input id="quantity" type="number" class="form-control" @bind="_itemModel.Quantity" placeholder="Quantity" />
+            <label for="quantity">Quantity</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_editItemErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
+        }
+    </ModalDialog>
+}*@
+@if (_showDeleteItemDialog)
+{
+    <ModalDialog Title="Delete Item Log" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
+        <p>Are you sure you want to delete <strong>@_deleteItem.ItemName</strong> item log?</p>
+        @if (!string.IsNullOrEmpty(_deleteItemErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_deleteItemErrorMessage" />
+        }
+    </ModalDialog>
+}
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private bool _showEditItemDialog { get; set; }
+    private bool _showDeleteItemDialog { get; set; }
+    private List<Items> _items { get; set; }
+    private List<InventoryLog> _inventoryLog { get; set; }
+    private InventoryLog _deleteItem { get; set; }
+    private string _dialogTitle { get; set; }
+    private string _dialogOkLabel { get; set; }
+    private string _editItemErrorMessage { get; set; }
+    private string _deleteItemErrorMessage { get; set; }
+    private Items _itemModel { get; set; }
+    private InventoryLog _logModel { get; set; }
+    private string _sortBy = "takenOutAt";
+    private string _sortDirection = "ascending";
+
+    protected override void OnInitialized()
+    {
+        _items = ItemsService.GetAll();
+        _inventoryLog = InventoryLogService.GetAll();
+    }
+
+    private void SortByHandler(string sortByName)
+    {
+        if (_sortBy == sortByName)
+        {
+            _sortDirection = _sortDirection == "ascending" ? "descending" : "ascending";
+        }
+        else
+        {
+            _sortBy = sortByName;
+            _sortDirection = "ascending";
+        }
+    }
+
+    private void OpenAddItemDialog()
+    {
+        _dialogTitle = "Add Item Log";
+        _dialogOkLabel = "Add";
+        _logModel = new InventoryLog();
+        _logModel.Id = Guid.Empty;
+        _showEditItemDialog = true;
+    }
+
+    private void SearchTaskName(ChangeEventArgs e)
+    {
+        var searchTerm = e.Value.ToString();
+        if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
+        {
+            _inventoryLog = InventoryLogService.GetAll().Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
+        }
+        else
+        {
+            _inventoryLog = InventoryLogService.GetAll();
+        }
+    }
+
+    private void OpenEditItemDialog(InventoryLog editItem)
+    {
+        _dialogTitle = "Edit InventoryLog";
+        _dialogOkLabel = "Save";
+
+        _logModel = editItem;
+
+        _showEditItemDialog = true;
+    }
+
+    private void OpenDeleteItemDialog(InventoryLog itemItem)
+    {
+        _deleteItem = itemItem;
+        _showDeleteItemDialog = true;
+    }
+
+    private void OnEditItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showEditItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _editItemErrorMessage = "";
+                if (_logModel.Id == Guid.Empty)
+                {
+                    _inventoryLog = InventoryLogService.Create(_globalState.CurrentUser.Id, _logModel.ItemName, _logModel.Quantity, _logModel.TakenBy);
+                }
+                else
+                {
+                    _inventoryLog = InventoryLogService.Update(_logModel.Id, _logModel.ItemName, _logModel.Quantity, _logModel.TakenBy);
+                }
+                _showEditItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _editItemErrorMessage = e.Message;
+            }
+        }
+    }
+
+    private void OnDeleteItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+
+            _showDeleteItemDialog = false;
+            _deleteItem = null;
+        }
+        else
+        {
+            try
+            {
+                _deleteItemErrorMessage = "";
+                _inventoryLog = InventoryLogService.Delete(_deleteItem.Id);
+                _showDeleteItemDialog = false;
+                _deleteItem = null;
+            }
+            catch (Exception e)
+            {
+                _deleteItemErrorMessage = e.Message;
+            }
+        }
+    }
+}
