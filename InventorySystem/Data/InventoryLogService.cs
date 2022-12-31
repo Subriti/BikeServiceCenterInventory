@@ -83,21 +83,21 @@ public static class InventoryLogService
         var weekDays = new List<string>() { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
         var dayOfWeek = DateTime.Now.DayOfWeek.ToString();
 
-       /* if (!weekDays.Contains(dayOfWeek))
+        if (!weekDays.Contains(dayOfWeek))
         {
             throw new Exception("Items cannot be requested on " + dayOfWeek);
-        }*/
+        }
 
         TimeSpan today = DateTime.Now.TimeOfDay;    // 12/29/2022 6:52:36 PM
         int nowHrs = (int)today.TotalHours;        // 18:52:36.9759334
         int startTime = 09;     // 09:00 am
         int endTime = 16;      // 04:00 pm
 
-       /* if (nowHrs > endTime || nowHrs < startTime)
+        if (nowHrs > endTime || nowHrs < startTime)
         {
             throw new Exception("Items can only be requested between 9 am to 4 pm");
         }
-*/
+
 
         List<Items> items = ItemsService.GetAll();
         bool itemNameExists = items.Any(x => x.ItemName == itemName);

@@ -3,8 +3,36 @@
     <h1 class="navbar-brand mb-0 h1">Chart depicting the Inventory Items and Total Quantity taken out</h1>
 </nav>
 
+@{
+     List<string> ItemNameList = new List<string>();
+     List<double> QuantityList = new List<double>();
+
+    foreach (var item in keyValuePairs)
+    {
+        var ItemName = item.Key;
+        var TotalQuantity = item.Value;
+
+        ItemNameList.Add(ItemName);
+        QuantityList.Add((double)TotalQuantity);
+    }
+
+    ItemNameArray = ItemNameList.ToArray();
+    QuantityArray = QuantityList.ToArray();
+
+    Series = new List<ChartSeries>() { new ChartSeries() { Name = "Items", Data = QuantityArray } };
+    XAxisLabels = ItemNameArray;
+}
+
 <div>
-    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px">
+        <CustomGraphics>
+            <style>
+                .mud-chart-bar{
+                    stroke-width: 18px;
+                }
+            </style>
+        </CustomGraphics>
+    </MudChart>
 </div>
 
 @foreach (var item in keyValuePairs)
@@ -15,23 +43,22 @@
     </p>
 }
 
+
+
 @code {
     [CascadingParameter]
-    private Dictionary<string,int> keyValuePairs { get; set; }
-    private string[] ItemNameList { get; set; }
+    private Dictionary<string, int> keyValuePairs { get; set; }
+    private static string[] ItemNameArray;
+    private static double[] QuantityArray;
 
     protected override void OnInitialized()
     {
         keyValuePairs = InventoryLogService.GetTotalQuantityTakenOut();
     }
 
-  
-    public List<ChartSeries> Series = new List<ChartSeries>()
-    {
-        new ChartSeries() { Name = "United States", Data = new double[] { 40, 20, 25, 27, 46, 60, 48, 80, 15 } },
-        new ChartSeries() { Name = "Germany", Data = new double[] { 19, 24, 35, 13, 28, 15, 13, 16, 31 } },
-        new ChartSeries() { Name = "Sweden", Data = new double[] { 8, 6, 11, 13, 4, 16, 10, 16, 18 } },
-    };
-    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+    public List<ChartSeries> Series;
+
+    public string[] XAxisLabels;
+
 }
 
