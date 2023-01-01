@@ -1,15 +1,9 @@
 ﻿@page "/request-items"
 
 <nav class="navbar navbar-light bg-light justify-content-between">
-    <h1 class="navbar-brand mb-0 h1">Requested Items</h1>
+    @*<h1 class="navbar-brand mb-0 h1">Requested Items</h1>*@
 
-
-    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
-        <span class="oi oi-wrench" /> Request
-    </button>
-</nav>
-
-<p style="float: left">
+    <p style="float: left;  font-size: 1.1rem;">
     <span class="oi oi-eye" /> View Inventory Logs for the month of
     <select id="arrMonth" @bind="_selectedMonth">
         <option value="" disabled selected hidden>-- Select a month --</option>
@@ -27,6 +21,12 @@
         <option value="December"> December</option>
     </select>
 </p>
+
+    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
+        <span class="oi oi-wrench" /> Request
+    </button>
+</nav>
+<br />
 
 <table class="table">
     <thead>
@@ -76,7 +76,6 @@
                     </a>
                 </div>
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -117,30 +116,22 @@
 
             foreach (var itemLog in inventoryLogList)
             {
-                <tr>
-                    <td>@itemLog.ItemName</td>
-                    <td>@itemLog.Quantity</td>
-                    <td>
-                        @{
+                        <tr>
+                            <td>@itemLog.ItemName</td>
+                            <td>@itemLog.Quantity</td>
+                            <td>
+                                @{
                             var creator = UsersService.GetById(itemLog.ApprovedBy);
-                            <span>@(creator == null ? "Unknown" : creator.Username)</span>
-                        }
-                    </td>
-                    <td>@itemLog.TakenBy</td>
-                    <td>
-                        <p class="small mb-0">
-                            @itemLog.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
-                        </p>
-                    </td>
-                    <td>
-                        <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemLog)">
-                            <span class="oi oi-pencil" /> Edit
-                        </button>
-                        <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemLog)">
-                            <span class="oi oi-delete" /> Delete
-                        </button>
-                    </td>
-                </tr>
+                                            <span>@(creator == null ? "Unknown" : creator.Username)</span>
+                                }
+                            </td>
+                            <td>@itemLog.TakenBy</td>
+                            <td>
+                                <p class="small mb-0">
+                                    @itemLog.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
+                                </p>
+                            </td>
+                        </tr>
             }
         }
     </tbody>
@@ -164,17 +155,6 @@
         @if (!string.IsNullOrEmpty(_editItemErrorMessage))
         {
             <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
-        }
-        </ModalDialog>
-}
-
-@if (_showDeleteItemDialog)
-{
-    <ModalDialog Title="Delete Item" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
-        <p>Are you sure you want to delete <strong>@_deleteItem.ItemName</strong> item log?</p>
-        @if (!string.IsNullOrEmpty(_deleteItemErrorMessage))
-        {
-            <AlertMessage Type="danger" Message="@_deleteItemErrorMessage" />
         }
         </ModalDialog>
 }
@@ -214,16 +194,6 @@
         }
     }
 
-    private string SelectMonth()
-    {
-        List<String> months = new List<String> { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
-        foreach (var i in months)
-        {
-            return i;
-        }
-        return months[0];
-    }
-
     private void OpenAddItemDialog()
     {
         _dialogTitle = "Item Requests";
@@ -246,22 +216,7 @@
         }
     }
 
-    private void OpenEditItemDialog(InventoryLog editItem)
-    {
-        _dialogTitle = "Edit Item Log";
-        _dialogOkLabel = "Save";
-
-        _logModel = editItem;
-
-        _showEditItemDialog = true;
-    }
-
-    private void OpenDeleteItemDialog(InventoryLog itemItem)
-    {
-        _deleteItem = itemItem;
-        _showDeleteItemDialog = true;
-    }
-
+  
     private void OnEditItemDialogClose(bool isCancel)
     {
         if (isCancel)
@@ -286,29 +241,6 @@
             catch (Exception e)
             {
                 _editItemErrorMessage = e.Message;
-            }
-        }
-    }
-    private void OnDeleteItemDialogClose(bool isCancel)
-    {
-        if (isCancel)
-        {
-
-            _showDeleteItemDialog = false;
-            _deleteItem = null;
-        }
-        else
-        {
-            try
-            {
-                _deleteItemErrorMessage = "";
-                _logs = InventoryLogService.Delete(_deleteItem.Id);
-                _showDeleteItemDialog = false;
-                _deleteItem = null;
-            }
-            catch (Exception e)
-            {
-                _deleteItemErrorMessage = e.Message;
             }
         }
     }

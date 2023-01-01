@@ -80,6 +80,11 @@ public static class ItemsService
             throw new Exception("Item not found.");
         }
 
+        if (quantity < 1)
+        {
+            throw new Exception("Quantity must be minimum of 1 to add item");
+        }
+
         itemToUpdate.ItemName = taskName;
         itemToUpdate.Quantity = quantity;
         SaveAll(items);

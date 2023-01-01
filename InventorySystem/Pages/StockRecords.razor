@@ -1,55 +1,121 @@
 ﻿@page "/stock-records"
-<nav class="navbar navbar-light bg-light justify-content-between">
+<nav class="navbar justify-content-center bg-light">
     <h1 class="navbar-brand mb-0 h1">Chart depicting the Inventory Items and Total Quantity taken out</h1>
 </nav>
 
-@{
-     List<string> ItemNameList = new List<string>();
-     List<double> QuantityList = new List<double>();
-
-    foreach (var item in keyValuePairs)
-    {
-        var ItemName = item.Key;
-        var TotalQuantity = item.Value;
-
-        ItemNameList.Add(ItemName);
-        QuantityList.Add((double)TotalQuantity);
+<style>
+    table {
+       
+        border-spacing: 15px;
+        /* margin-left: auto;
+            margin-right: auto;
+             width: 25%;*/
     }
 
-    ItemNameArray = ItemNameList.ToArray();
-    QuantityArray = QuantityList.ToArray();
+    th {
+        background-color: lightblue;
+        padding: 10px;
+        text-align: center;
+    }
 
-    Series = new List<ChartSeries>() { new ChartSeries() { Name = "Items", Data = QuantityArray } };
-    XAxisLabels = ItemNameArray;
+    td {
+        background-color: lightgrey;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .legend {
+        list-style: none;
+        position: absolute;
+        margin-top:-230px; 
+        margin-left: 200px;
+        transform: rotate(-90deg);
+        perspective: 100px;
+    }
+
+        .legend li {
+            float: left;
+            margin-right: 10px;
+        }
+
+        .legend span {
+            border-radius: 50px;
+            border: 1px solid #ccc;
+            float: left;
+            width: 12px;
+            height: 14px;
+            margin: 2px;
+            margin-top: 3px;
+        }
+
+        .legend .itemsTaken {
+            background-color: #2979FF;
+        }
+
+</style>
+
+@{
+    List<string> ItemNameList = new List<string>();
+    List<double> QuantityList = new List<double>();
+
+    <br />
+    <table class="table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                Item Name
+                            </th>
+                            <th>
+                                Total Quantity
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in keyValuePairs)
+            {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td>@item.Value</td>
+                            </tr>
+                ItemNameList.Add(item.Key);
+                QuantityList.Add((double)item.Value);
+            }
+                    </tbody>
+    </table>
+
+
+    itemNameArray = ItemNameList.ToArray();
+    quantityArray = QuantityList.ToArray();
+
+    Series = new List<ChartSeries>() { new ChartSeries() { Name = "Items", Data = quantityArray } };
+    XAxisLabels = itemNameArray;
 }
 
-<div>
-    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px">
+<ul class="legend">
+    <li><span class="itemsTaken"></span>Total Quantity Taken Out</li>
+</ul>
+
+<div style="position:absolute; margin-top:-400px; margin-left: 290px; border: 1px solid black; width: 735px;">
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="80%" Height="350px">
         <CustomGraphics>
             <style>
-                .mud-chart-bar{
-                    stroke-width: 18px;
+                .mud-chart-bar {
+                    stroke-width: 20px;
+                }
+
+                svg.mud-chart-line.mud-ltr {
+                    width: 100%;
                 }
             </style>
         </CustomGraphics>
     </MudChart>
 </div>
 
-@foreach (var item in keyValuePairs)
-{
-    <p>
-        ItemName: @item.Key <br />
-        TotalQuantity: @item.Value
-    </p>
-}
-
-
-
 @code {
     [CascadingParameter]
     private Dictionary<string, int> keyValuePairs { get; set; }
-    private static string[] ItemNameArray;
-    private static double[] QuantityArray;
+    private static string[] itemNameArray;
+    private static double[] quantityArray;
 
     protected override void OnInitialized()
     {

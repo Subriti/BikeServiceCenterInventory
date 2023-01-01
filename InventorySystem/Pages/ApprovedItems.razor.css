@@ -14,3 +14,7 @@
 .Item-toolbar .search {
     background-color: #eff1f2;
 }
+
+th {
+    background-color: lightblue;
+}

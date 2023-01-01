@@ -6,27 +6,29 @@
         <span class="oi oi-plus" /> Add
     </button>
 </nav>
+<br/>
+
 <table class="table">
     <thead>
         <tr>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Created At</th>
-            <th>CreatedBy</th>
-            <th>Actions</th>
+            <th style="background-color: lightblue; padding:10px;">Username</th>
+            <th style ="background-color: lightblue; padding:10px;">Role</th>
+            <th style="background-color: lightblue; padding:10px;">Created At</th>
+            <th style="background-color: lightblue; padding:10px;">CreatedBy</th>
+            <th style="background-color: lightblue; padding:10px;">Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var user in _users)
         {
-            <tr>
+            <tr class="p-2 bg-light border">
                 <td>@user.Username</td>
                 <td>@user.Role.ToString()</td>
                 <td>@user.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</td>
                 <td>
                     @{
                         var creator = UsersService.GetById(user.CreatedBy);
-                        <span>@(creator == null ? "Unknown" : creator.Username)</span>
+                                    <span>@(creator == null ? "Unknown" : creator.Username)</span>
                     }
                 </td>
                 <td>

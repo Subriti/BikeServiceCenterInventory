@@ -1,15 +1,12 @@
-﻿@page "/add-items"
+﻿@page "/inventory"
 
-<nav class="navbar navbar-light bg-light justify-content-between">
-    <h1 class="navbar-brand mb-0 h1">Items</h1>
-    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
-        <span class="oi oi-plus" /> Add
-    </button>
-</nav>
+<nav class="navbar justify-content-center bg-light">
+    <h1 class="navbar-brand mb-0 h1 "> Items Available in the Inventory</h1>
+</nav> <br />
 
 <table class="table">
     <thead>
-        <tr>
+        <tr class="p-2 bg-lightblue border">
             <th>
                 <div class="d-flex">
                     <input type="search" class="form-control search" placeholder="Search" @oninput="SearchTaskName" />
@@ -43,7 +40,11 @@
                     Last Taken out on
                 </div>
             </th>
-            <th></th>
+            <th>
+                <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog" style="float:right;">
+                    <span class="oi oi-plus" /> Add Items
+                </button>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -68,29 +69,30 @@
 
             foreach (var itemItem in itemList)
             {
-                <tr>
-                    <td>@itemItem.ItemName</td>
-                    <td>@itemItem.Quantity</td>
-                    <td>
-                        <p class="small mb-0">
-                            @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
-                        </p>
-                    </td>
-                    <td><p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p></td>
-                    <td>
-                        <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
-                            <span class="oi oi-pencil" /> Edit
-                        </button>
-                        <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
-                            <span class="oi oi-delete" /> Delete
-                        </button>
-                    </td>
-                </tr>
+                    <tr class="p-2 bg-light border">
+                    
+                        <td>@itemItem.ItemName</td>
+                        <td>@itemItem.Quantity</td>
+                        <td>
+                            <p class="small mb-0">
+                                @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                            </p>
+                        </td>
+                        <td><p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p></td>
+                        <td>
+                            <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
+                                <span class="oi oi-pencil" /> Edit
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
+                                <span class="oi oi-delete" /> Delete
+                            </button>
+                        </td>
+                    
+                    </tr>
             }
         }
     </tbody>
 </table>
-@*  this in <td> @InventoryLogService.ItemLastTakenOut(@itemItem.ItemName)*@
 @if (_showEditItemDialog)
 {
     <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">

@@ -56,6 +56,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Remove="Pages\Inventory.razor" />
       <Content Remove="Pages\LoginPage.razor.razor" />
       <Content Remove="Shared\SurveyPrompt.razor" />
       <Content Remove="wwwroot\images\img1.jpg" />
@@ -71,7 +72,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.0-beta.700" />
       <PackageReference Include="MudBlazor" Version="6.1.6" />
     </ItemGroup>
 
