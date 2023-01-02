@@ -70,7 +70,7 @@ public static class ItemsService
     }
 
 
-    public static List<Items> Update(Guid id, string taskName, int quantity)
+    public static List<Items> Update(Guid id, string itemName, int quantity)
     {
         List<Items> items = GetAll();
         Items itemToUpdate = items.FirstOrDefault(x => x.Id == id);
@@ -85,8 +85,16 @@ public static class ItemsService
             throw new Exception("Quantity must be minimum of 1 to add item");
         }
 
-        itemToUpdate.ItemName = taskName;
+        if (itemToUpdate.ItemName != itemName)
+        {
+            //on edit, updating all the existing logs with the new item name
+            InventoryLogService.UpdateItemName(itemToUpdate.ItemName, itemName);
+
+            itemToUpdate.ItemName = itemName; 
+        }
+
         itemToUpdate.Quantity = quantity;
+
         SaveAll(items);
         return items;
     }
