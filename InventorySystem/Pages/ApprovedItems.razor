@@ -232,10 +232,6 @@
                 {
                     _logs = InventoryLogService.Create(_globalState.CurrentUser.Id, _logModel.ItemName, _logModel.Quantity, _logModel.TakenBy);
                 }
-                else
-                {
-                    _logs = InventoryLogService.Update(_logModel.Id, _logModel.ItemName, _logModel.Quantity, _logModel.TakenBy);
-                }
                 _showEditItemDialog = false;
             }
             catch (Exception e)

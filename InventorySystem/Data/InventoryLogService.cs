@@ -1,9 +1,11 @@
 ﻿using System.Text.Json;
+using Debug = System.Diagnostics.Debug;
 
 namespace InventorySystem.Data;
 
 public static class InventoryLogService
 {
+    //writing data to JSON file
     private static void SaveAll(List<InventoryLog> itemLogs)
     {
         string appDataDirectoryPath = Utils.GetJSONfilePath();
@@ -18,6 +20,7 @@ public static class InventoryLogService
         File.WriteAllText(itemsFilePath, json);
     }
 
+    //getting data from JSON file and storing into a List of type InventoryLog
     public static List<InventoryLog> GetAll()
     {
         string itemsFilePath = Utils.GetInventoryLogFilePath();
@@ -30,6 +33,8 @@ public static class InventoryLogService
         return JsonSerializer.Deserialize<List<InventoryLog>>(json);
     }
 
+
+    //For Sorting the data according to the Month of Taken Items
     public static List<InventoryLog> GetAllByMonth(string month)
     {
         List<InventoryLog> log = GetAll();
@@ -47,6 +52,7 @@ public static class InventoryLogService
         return sortedByMonth;
     }
 
+    //For plotting the graph; calculating the items and the total quantity taken out
     public static Dictionary<string, int> GetTotalQuantityTakenOut()
     {
         List<InventoryLog> log = GetAll();
@@ -72,12 +78,14 @@ public static class InventoryLogService
     }
 
 
+    //returning the InventoryLog object having itemName; Using Last because we need the last item added to the List
     public static InventoryLog GetByName(string itemName)
     {
-        List<InventoryLog> log = GetAll();
-        return log.LastOrDefault(x => x.ItemName == itemName);
+        return GetAll().LastOrDefault(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
     }
 
+
+    //creating item requests
     public static List<InventoryLog> Create(Guid userId, string itemName, int quantity, string takenBy)
     {
         var weekDays = new List<string>() { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
@@ -88,19 +96,19 @@ public static class InventoryLogService
             throw new Exception("Items cannot be requested on " + dayOfWeek);
         }
 
-        TimeSpan today = DateTime.Now.TimeOfDay;    // 12/29/2022 6:52:36 PM
-        int nowHrs = (int)today.TotalHours;        // 18:52:36.9759334
+        TimeSpan today = DateTime.Now.TimeOfDay;    // 18:52:36.9759334
+        int nowHrs = (int)today.TotalHours;        // 18
         int startTime = 09;     // 09:00 am
         int endTime = 16;      // 04:00 pm
 
-        if (nowHrs > endTime || nowHrs < startTime)
+        if (nowHrs >= endTime || nowHrs < startTime)
         {
             throw new Exception("Items can only be requested between 9 am to 4 pm");
         }
 
 
-        List<Items> items = ItemsService.GetAll();
-        bool itemNameExists = items.Any(x => x.ItemName == itemName);
+        //checking if the item exists in the inventory; returns bool
+        var itemNameExists = ItemsService.GetAll().Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
 
         if (!itemNameExists)
         {
@@ -113,14 +121,15 @@ public static class InventoryLogService
             throw new Exception("Quantity must be minimum of 1 for request");
         }
 
-        var currentItem = ItemsService.GetByName(itemName);
+        //checking if the item requested has enough quantity in the inventory
+        var currentItem = ItemsService.GetItemByName(itemName);
         if (quantity > currentItem.Quantity)
         {
             throw new Exception("Requested quantity is currently unavailable.");
         }
 
-        List<User> user = UsersService.GetAll();
-        bool userNameExists = user.Any(x => x.Username == takenBy);
+        //checking if the user exists in the system; .Any returns bool
+        bool userNameExists = UsersService.GetAll().Any(x => x.Username == takenBy);
 
         if (!userNameExists)
         {
@@ -130,7 +139,7 @@ public static class InventoryLogService
         List<InventoryLog> itemLog = GetAll();
         itemLog.Add(new InventoryLog
         {
-            ItemName = itemName,
+            ItemName = currentItem.ItemName,
             Quantity = quantity,
             ApprovedBy = userId,
             TakenBy = takenBy
@@ -138,43 +147,10 @@ public static class InventoryLogService
         SaveAll(itemLog);
 
         //after saving the item log, updating the quantity and LastTakenOut in Items
-        var currentLog = InventoryLogService.GetByName(itemName);
+        var currentLog = GetByName(itemName);
 
         ItemsService.Update(currentItem.Id, quantity, currentLog.TakenOutAt);
 
         return itemLog;
-    }
-
-    public static List<InventoryLog> Delete(Guid id)
-    {
-        List<InventoryLog> items = GetAll();
-        InventoryLog Item = items.FirstOrDefault(x => x.Id == id);
-
-        if (Item == null)
-        {
-            throw new Exception("Item log not found.");
-        }
-
-        items.Remove(Item);
-        SaveAll(items);
-        return items;
-    }
-
-
-    public static List<InventoryLog> Update(Guid id, string taskName, int quantity, string takenBy)
-    {
-        List<InventoryLog> items = GetAll();
-        InventoryLog itemToUpdate = items.FirstOrDefault(x => x.Id == id);
-
-        if (itemToUpdate == null)
-        {
-            throw new Exception("Item Log not found.");
-        }
-
-        itemToUpdate.ItemName = taskName;
-        itemToUpdate.Quantity = quantity;
-        itemToUpdate.TakenBy = takenBy;
-        SaveAll(items);
-        return items;
     }
 }

@@ -48,10 +48,10 @@ public static class ItemsService
         return items;
     }
 
-    public static Items GetByName(string itemName)
+    //returns one Items Object
+    public static Items GetItemByName(string itemName)
     {
-        List<Items> items = GetAll();
-        return items.FirstOrDefault(x => x.ItemName == itemName);
+        return GetAll().FirstOrDefault(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
     }
 
     public static List<Items> Delete(Guid id)
