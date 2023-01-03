@@ -1,24 +1,14 @@
 ﻿@page "/request-items"
 
 <nav class="navbar navbar-light bg-light justify-content-between">
-    @*<h1 class="navbar-brand mb-0 h1">Requested Items</h1>*@
-
     <p style="float: left;  font-size: 1.1rem;">
     <span class="oi oi-eye" /> View Inventory Logs for the month of
-    <select id="arrMonth" @bind="_selectedMonth">
+@*    displaying each item of the list as options*@
+    <select id="arrMonth" @bind="_selectedMonth" @oninput="StartItemSearch">
         <option value="" disabled selected hidden>-- Select a month --</option>
-        <option value="January"> January</option>
-        <option value="February"> February</option>
-        <option value="March"> March</option>
-        <option value="April"> April</option>
-        <option value="May"> May</option>
-        <option value="June"> June</option>
-        <option value="July"> July</option>
-        <option value="August"> August</option>
-        <option value="September"> September</option>
-        <option value="October"> October</option>
-        <option value="November"> November</option>
-        <option value="December"> December</option>
+        @foreach(var month in monthsList){
+                <option value="@month"> @month</option>
+        }
     </select>
 </p>
 
@@ -82,7 +72,7 @@
         @{
             IEnumerable<InventoryLog> inventoryLogList = _logs;
 
-            if (_selectedMonth != "")
+            if (_selectedMonth != "" && searchTerm=="")
             {
                 _logsSortedByMonth = InventoryLogService.GetAllByMonth(_selectedMonth);
                 inventoryLogList = _logsSortedByMonth;
@@ -175,10 +165,14 @@
     private string _sortBy = "takenOutAt";
     private string _sortDirection = "ascending";
     private string _selectedMonth = "";
+    private string searchTerm = "";
+    private ChangeEventArgs globalSearchEventArgs= null;
+    private List<String> monthsList{ get; set; }
 
     protected override void OnInitialized()
     {
         _logs = InventoryLogService.GetAll();
+        monthsList = InventoryLogService.GetMonths();
     }
 
     private void SortByHandler(string sortByName)
@@ -203,17 +197,48 @@
         _showEditItemDialog = true;
     }
 
-    private void SearchTaskName(ChangeEventArgs e)
+    //on input of month, if the search bar is not empty, search items with the name
+    private void StartItemSearch(ChangeEventArgs e){
+
+        //getting the selected month
+        _selectedMonth = e.Value.ToString();
+
+        if(_selectedMonth!="" && searchTerm!=""){
+            SearchTaskName(globalSearchEventArgs);
+        }
+    }
+
+    //method to search item name and display the searched data in the table
+    public void SearchTaskName(ChangeEventArgs e)
     {
-        var searchTerm = e.Value.ToString();
-        if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
+        globalSearchEventArgs = e;
+        searchTerm = e.Value.ToString();
+
+        //on month selected, search on the sorted month data
+        if (_selectedMonth != "" && searchTerm!="")
         {
-            _logs = InventoryLogService.GetAll().Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
+            if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
+            {
+                _logs = InventoryLogService.GetAllByMonth(_selectedMonth).Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
+            }
+            else{
+                _logs = InventoryLogService.GetAllByMonth(_selectedMonth);
+            }
         }
-        else
+
+        //else search on full data
+        else if (_selectedMonth == "")
         {
-            _logs = InventoryLogService.GetAll();
+            if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
+            {
+                _logs = InventoryLogService.GetAll().Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
+            }
+            else
+            {
+                _logs = InventoryLogService.GetAll();
+            }
         }
+
     }
 
   

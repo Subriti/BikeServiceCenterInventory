@@ -76,6 +76,12 @@ public static class InventoryLogService
         return itemAndQuantity;
     }
 
+    public static List<String> GetMonths()
+    {
+        List<String> months= new List<String>() {"January","February","March","April","May","June","July","August","September","October","November","December"};
+        return months;
+    }
+
 
     //returning the InventoryLog object having itemName; Using Last because we need the last item added to the List
     public static InventoryLog GetByName(string itemName)
