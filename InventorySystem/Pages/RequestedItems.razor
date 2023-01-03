@@ -2,22 +2,26 @@
 
 <nav class="navbar navbar-light bg-light justify-content-between">
     <p style="float: left;  font-size: 1.1rem;">
-    <span class="oi oi-eye" /> View Inventory Logs for the month of
-@*    displaying each item of the list as options*@
-    <select id="arrMonth" @bind="_selectedMonth" @oninput="StartItemSearch">
-        <option value="" disabled selected hidden>-- Select a month --</option>
-        @foreach(var month in monthsList){
-                <option value="@month"> @month</option>
-        }
-    </select>
-</p>
+        <span class="oi oi-eye" /> View Inventory Logs for the month of
 
+        @*    displaying each item of the list as options*@
+        <select id="arrMonth" @bind="_selectedMonth" @oninput="StartItemSearch">
+            <option value="" disabled selected hidden>-- Select a month --</option>
+            @foreach (var month in monthsList)
+            {
+                <option value="@month"> @month</option>
+            }
+        </select>
+    </p>
+
+    @* OpenAddItemDialog displays dialog box for adding the item log and binding the required data*@
     <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
         <span class="oi oi-wrench" /> Request
     </button>
 </nav>
 <br />
 
+@*Creating a table and defining its row and headers*@
 <table class="table">
     <thead>
         <tr>
@@ -70,16 +74,21 @@
     </thead>
     <tbody>
         @{
+            //initialising inventoryLogList with all the JSON data
             IEnumerable<InventoryLog> inventoryLogList = _logs;
 
-            if (_selectedMonth != "" && searchTerm=="")
+            if (_selectedMonth != "" && searchTerm == "")
             {
+                //storing the sorted monthyly data in _logsSortedByMonth
                 _logsSortedByMonth = InventoryLogService.GetAllByMonth(_selectedMonth);
+
+                //updating inventoryLogList data with the sorted data from _logsSortedByMonth
                 inventoryLogList = _logsSortedByMonth;
             }
 
             if (_sortBy == "itemName")
             {
+                //sorting the data and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.ItemName) : inventoryLogList.OrderByDescending(t =>
                 t.ItemName);
             }
@@ -104,32 +113,34 @@
                 t.TakenOutAt);
             }
 
+            //looping over each item in the inventoryLogList to display each data
             foreach (var itemLog in inventoryLogList)
             {
-                        <tr>
-                            <td>@itemLog.ItemName</td>
-                            <td>@itemLog.Quantity</td>
-                            <td>
-                                @{
+                <tr class="p-2 bg-light border">
+                    <td>@itemLog.ItemName</td>
+                    <td>@itemLog.Quantity</td>
+                    <td>
+                        @{
                             var creator = UsersService.GetById(itemLog.ApprovedBy);
-                                            <span>@(creator == null ? "Unknown" : creator.Username)</span>
-                                }
-                            </td>
-                            <td>@itemLog.TakenBy</td>
-                            <td>
-                                <p class="small mb-0">
-                                    @itemLog.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
-                                </p>
-                            </td>
-                        </tr>
+                            <span>@(creator == null ? "Unknown" : creator.Username)</span>
+                        }
+                    </td>
+                    <td>@itemLog.TakenBy</td>
+                    <td>
+                        <p class="small mb-0">
+                            @itemLog.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
+                        </p>
+                    </td>
+                </tr>
             }
         }
     </tbody>
 </table>
 
-@if (_showEditItemDialog)
+@*for displaying form for adding the item log*@
+@if (_showAddItemLogDialog)
 {
-    <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
+    <ModalDialog Title="@_dialogTitle" OnClose="@OnAddItemLogDialogClose" OkLabel="@_dialogOkLabel">
         <div class="form-floating mb-3">
             <input id="itemName" type="text" class="form-control" @bind="_logModel.ItemName" placeholder="Item Name" />
             <label for="itemName">Item Name</label>
@@ -146,35 +157,37 @@
         {
             <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
         }
-        </ModalDialog>
+    </ModalDialog>
 }
 
 @code {
     [CascadingParameter]
     private GlobalState _globalState { get; set; }
-    private bool _showEditItemDialog { get; set; }
-    private bool _showDeleteItemDialog { get; set; }
+    private bool _showAddItemLogDialog { get; set; }
     private List<InventoryLog> _logs { get; set; }
     private List<InventoryLog> _logsSortedByMonth { get; set; }
-    private InventoryLog _deleteItem { get; set; }
     private string _dialogTitle { get; set; }
     private string _dialogOkLabel { get; set; }
     private string _editItemErrorMessage { get; set; }
-    private string _deleteItemErrorMessage { get; set; }
     private InventoryLog _logModel { get; set; }
     private string _sortBy = "takenOutAt";
     private string _sortDirection = "ascending";
     private string _selectedMonth = "";
     private string searchTerm = "";
-    private ChangeEventArgs globalSearchEventArgs= null;
-    private List<String> monthsList{ get; set; }
+    private ChangeEventArgs globalSearchEventArgs = null;
+    private List<String> monthsList { get; set; }
+
 
     protected override void OnInitialized()
     {
+        //getting all JSON data into a List of type InventoryLog
         _logs = InventoryLogService.GetAll();
+
+        //getting all months for populating the combobox
         monthsList = InventoryLogService.GetMonths();
     }
 
+    //sorts the data of the table
     private void SortByHandler(string sortByName)
     {
         if (_sortBy == sortByName)
@@ -188,22 +201,15 @@
         }
     }
 
-    private void OpenAddItemDialog()
-    {
-        _dialogTitle = "Item Requests";
-        _dialogOkLabel = "Add";
-        _logModel = new InventoryLog();
-        _logModel.Id = Guid.Empty;
-        _showEditItemDialog = true;
-    }
-
     //on input of month, if the search bar is not empty, search items with the name
-    private void StartItemSearch(ChangeEventArgs e){
-
+    private void StartItemSearch(ChangeEventArgs e)
+    {
         //getting the selected month
         _selectedMonth = e.Value.ToString();
 
-        if(_selectedMonth!="" && searchTerm!=""){
+        if (_selectedMonth != "" && searchTerm != "")
+        {
+            //calling the method SearchTaskName
             SearchTaskName(globalSearchEventArgs);
         }
     }
@@ -215,13 +221,16 @@
         searchTerm = e.Value.ToString();
 
         //on month selected, search on the sorted month data
-        if (_selectedMonth != "" && searchTerm!="")
+        if (_selectedMonth != "" && searchTerm != "")
         {
             if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
             {
+                //get all sorted item log list where item name matches the search criteria
                 _logs = InventoryLogService.GetAllByMonth(_selectedMonth).Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
             }
-            else{
+            else
+            {
+                //display all sorted data for the selected month
                 _logs = InventoryLogService.GetAllByMonth(_selectedMonth);
             }
         }
@@ -231,22 +240,37 @@
         {
             if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Length > 2)
             {
+                //checking the search criteria in all the existing log details, if found stored in _logs
                 _logs = InventoryLogService.GetAll().Where(t => t.ItemName.ToLower().Contains(searchTerm.ToLower())).ToList();
             }
             else
             {
+                //displaying all logs
                 _logs = InventoryLogService.GetAll();
             }
         }
 
     }
 
-  
-    private void OnEditItemDialogClose(bool isCancel)
+    //for displaying dialog box for adding the item log and binding the required data
+    private void OpenAddItemDialog()
+    {
+        _dialogTitle = "Item Requests";
+        _dialogOkLabel = "Add";
+        _logModel = new InventoryLog();
+        _logModel.Id = Guid.Empty;
+
+        //displays form in the UI
+        _showAddItemLogDialog = true;
+    }
+
+    @* denotes what to be done with the captured data when the form was submitted *@
+    private void OnAddItemLogDialogClose(bool isCancel)
     {
         if (isCancel)
         {
-            _showEditItemDialog = false;
+            //on cancel pressed, close the dialog UI
+            _showAddItemLogDialog = false;
         }
         else
         {
@@ -255,9 +279,11 @@
                 _editItemErrorMessage = "";
                 if (_logModel.Id == Guid.Empty)
                 {
+                    //creating the request log and saving the item log to the JSON file
                     _logs = InventoryLogService.Create(_globalState.CurrentUser.Id, _logModel.ItemName, _logModel.Quantity, _logModel.TakenBy);
                 }
-                _showEditItemDialog = false;
+                //on success, close the dialog UI
+                _showAddItemLogDialog = false;
             }
             catch (Exception e)
             {

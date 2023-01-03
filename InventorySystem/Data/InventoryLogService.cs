@@ -159,38 +159,19 @@ public static class InventoryLogService
         return itemLog;
     }
 
-    //on change of item name in itemService, changing the name in the existing Logs
-    public static List<InventoryLog> Update(string previousItemName, string newItemName)
-    {
-        //this item name is already changed naam so yo log ma bhetdai bhetdaina. change garnu agadi ko naam le search
-
-        //.contains garda ta Wheels has wheel in it so error aairacha ig
-        //getting all Logs with the same ItemName
-        List<InventoryLog> allLogs= GetAll().Where(t => t.ItemName.ToLower().Equals(previousItemName.ToLower())).ToList();
-        List<InventoryLog> logs = GetAll();
-
-        if (allLogs.Count > 0)
-        {
-            foreach(var log in allLogs)
-            {
-                log.ItemName = newItemName;
-                SaveAll(logs);
-                return logs;
-            }
-        }return logs;
-
-        //loop in big log get all wala then if tyo item log ko nam equals that change it yessss
-    }
 
     //on change of item name in itemService, changing the name in the existing Logs
     public static List<InventoryLog> UpdateItemName(string previousItemName, string newItemName)
     {
         List<InventoryLog> logs = GetAll();
 
+        //looping over the whole list
         foreach(var itemLog in logs)
         {
+            //checking if the existing logs contains the item name
             if (itemLog.ItemName.ToLower().Equals(previousItemName.ToLower()))
             {
+                //changing existing log's name to the new name
                 itemLog.ItemName = newItemName;
                 SaveAll(logs);
             }

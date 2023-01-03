@@ -55,14 +55,17 @@
         try
         {
             _errorMessage = "";
+            //saving the current users details in _globalState.CurrentUser
             _globalState.CurrentUser = UsersService.Login(_username, _password);
             if (_globalState.CurrentUser != null)
             {
                 if (_globalState.CurrentUser.Role == Role.Admin)
                 {
-                    //store Login Details of the current admin
+                    //store Login Details of the current admin in JSON file
                     AdminLoginService.Create(_globalState.CurrentUser.Id, _globalState.CurrentUser.Username);
                 }
+
+                //when login successful, display inventory page
                 NavManager.NavigateTo("/inventory");
             }
         }

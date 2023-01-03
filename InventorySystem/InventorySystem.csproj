@@ -50,6 +50,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <AndroidResource Remove="Resources\JSON Files\**" />
+      <Compile Remove="Resources\JSON Files\**" />
+      <Content Remove="Resources\JSON Files\**" />
+      <EmbeddedResource Remove="Resources\JSON Files\**" />
+      <MauiXaml Remove="Resources\JSON Files\**" />
+      <None Remove="Resources\JSON Files\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Remove="Data\Items - Copy.cs" />
       <Compile Remove="Data\WeatherForecast.cs" />
       <Compile Remove="Data\WeatherForecastService.cs" />

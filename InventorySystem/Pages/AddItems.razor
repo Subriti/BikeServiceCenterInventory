@@ -2,8 +2,10 @@
 
 <nav class="navbar justify-content-center bg-light">
     <h1 class="navbar-brand mb-0 h1 "> Items Available in the Inventory</h1>
-</nav> <br />
+</nav>
+<br />
 
+@*Creating a table and defining its row and headers*@
 <table class="table">
     <thead>
         <tr class="p-2 bg-lightblue border">
@@ -41,7 +43,9 @@
                 </div>
             </th>
             <th>
-                @if (UserRole == Role.Admin){
+                @*making the add items button available only to the admin*@
+                @if (UserRole == Role.Admin)
+                {
                     <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog" style="float:right;">
                         <span class="oi oi-plus" /> Add Items
                     </button>
@@ -51,9 +55,12 @@
     </thead>
     <tbody>
         @{
+
+             //initialising itemList with all the JSON data
             IEnumerable<Items> itemList = _items;
             if (_sortBy == "itemName")
             {
+                  //sorting the data and storing into the itemList
                 itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.ItemName) : itemList.OrderByDescending(t =>
                 t.ItemName);
             }
@@ -69,42 +76,54 @@
             }
 
 
+            //looping over each item in the itemList to display each data
             foreach (var itemItem in itemList)
             {
-                            <tr class="p-2 bg-light border">
-                            
-                                <td>@itemItem.ItemName</td>
-                                <td>@itemItem.Quantity</td>
-                                <td>
-                                    <p class="small mb-0">
-                                        @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
-                                    </p>
-                                </td>
-                                <td>@if(itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") == "Jan 01, 0001 12:00 AM"){
-                                    <p class="small mb-0">-- Unavailable --</p>
-                        }
-                            else{
-                                <p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p>}</td>
-                                <td>
-                                @if (UserRole == Role.Admin)
+                <tr class="p-2 bg-light border">
+
+                    <td>@itemItem.ItemName</td>
+                    <td>@itemItem.Quantity</td>
+                    <td>
+                        <p class="small mb-0">
+                            @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                        </p>
+                    </td>
+                    <td>
+                        @*if item is just added, display last taken at to be unavailable*@
+                        @if (itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") == "Jan 01, 0001 12:00 AM")
                         {
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
-                                        <span class="oi oi-pencil" /> Edit
-                                    </button>
-                                    <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
-                                        <span class="oi oi-delete" /> Delete
-                                    </button>
-                            }
-                                </td>
-                            
-                            </tr>
+                            <p class="small mb-0">-- Unavailable --</p>
+                        }
+                        else
+                        {
+                            <p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p>
+                        }
+                    </td>
+                    <td>
+                        @*making the edit and delete button available only to the admin*@
+                        @if (UserRole == Role.Admin)
+                        {
+                            <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
+                                @*OpenEditItemDialog helps assign the dialog title and set the field for edit in accordance with a Object model*@
+                                <span class="oi oi-pencil" /> Edit
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
+                                <span class="oi oi-delete" /> Delete
+                            </button>
+                        }
+                    </td>
+
+                </tr>
             }
         }
     </tbody>
 </table>
+
+@*for displaying form for adding/editing the item in the inventory*@
 @if (_showEditItemDialog)
 {
     <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
+        @*OnClose denotes what to be done with the captured data*@
         <div class="form-floating mb-3">
             <input id="itemName" type="text" class="form-control" @bind="_itemModel.ItemName" placeholder="Item Name" />
             <label for="itemName">Item Name</label>
@@ -118,9 +137,10 @@
         {
             <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
         }
-        </ModalDialog>
+    </ModalDialog>
 }
 
+@*for displaying the dialog box to confirm deleting of the item in the inventory*@
 @if (_showDeleteItemDialog)
 {
     <ModalDialog Title="Delete Item" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
@@ -129,7 +149,7 @@
         {
             <AlertMessage Type="danger" Message="@_deleteItemErrorMessage" />
         }
-        </ModalDialog>
+    </ModalDialog>
 }
 
 @code {
@@ -147,14 +167,15 @@
     private string _sortBy = "createdAt";
     private string _sortDirection = "ascending";
 
-    public Role UserRole ;
+    public Role UserRole;
 
     protected override void OnInitialized()
     {
         _items = ItemsService.GetAll();
-        UserRole =  _globalState.CurrentUser.Role;
+        UserRole = _globalState.CurrentUser.Role;
     }
 
+    //sorts the data of the table
     private void SortByHandler(string sortByName)
     {
         if (_sortBy == sortByName)
@@ -168,15 +189,7 @@
         }
     }
 
-    private void OpenAddItemDialog()
-    {
-        _dialogTitle = "Add Item";
-        _dialogOkLabel = "Add";
-        _itemModel = new Items();
-        _itemModel.Id = Guid.Empty;
-        _showEditItemDialog = true;
-    }
-
+    //helps display the list of items matching the search criteria (itemName)
     private void SearchTaskName(ChangeEventArgs e)
     {
         var searchTerm = e.Value.ToString();
@@ -190,26 +203,42 @@
         }
     }
 
+    //for displaying dialog box for adding the item into the inventory and binding the required data
+    private void OpenAddItemDialog()
+    {
+        _dialogTitle = "Add Item";
+        _dialogOkLabel = "Add";
+        _itemModel = new Items();
+        _itemModel.Id = Guid.Empty;
+        _showEditItemDialog = true;
+    }
+
+
+    //for displaying dialog box for editing the item present in the inventory and binding the required data
     private void OpenEditItemDialog(Items editItem)
     {
         _dialogTitle = "Edit Item";
         _dialogOkLabel = "Save";
 
-        //storing id name quantity of editItem in _itemModel
+        //storing id,name,quantity of editItem in _itemModel
         _itemModel = new Items();
         _itemModel.Id = editItem.Id;
         _itemModel.ItemName = editItem.ItemName;
         _itemModel.Quantity = editItem.Quantity;
 
+        //displays form in the UI
         _showEditItemDialog = true;
     }
 
+    //for binding the data for deletion and then displaying the dialog in the UI
     private void OpenDeleteItemDialog(Items itemItem)
     {
         _deleteItem = itemItem;
         _showDeleteItemDialog = true;
     }
 
+
+    @* denotes what to be done with the captured data when the form was submitted *@
     private void OnEditItemDialogClose(bool isCancel)
     {
         if (isCancel)
@@ -223,12 +252,16 @@
                 _editItemErrorMessage = "";
                 if (_itemModel.Id == Guid.Empty)
                 {
+                    //if the item has not been added yet, save the item to the inventory
                     _items = ItemsService.Create(_globalState.CurrentUser.Id, _itemModel.ItemName, _itemModel.Quantity);
                 }
                 else
                 {
+                    //if the item is present in the inventory, edit existing data and then save to the inventory
                     _items = ItemsService.Update(_itemModel.Id, _itemModel.ItemName, _itemModel.Quantity);
                 }
+
+                //on success, close the dialog UI
                 _showEditItemDialog = false;
             }
             catch (Exception e)
@@ -237,11 +270,12 @@
             }
         }
     }
+
+    @* denotes what to be done when the deletion was confirmed *@
     private void OnDeleteItemDialogClose(bool isCancel)
     {
         if (isCancel)
         {
-
             _showDeleteItemDialog = false;
             _deleteItem = null;
         }
@@ -250,6 +284,7 @@
             try
             {
                 _deleteItemErrorMessage = "";
+                //delete the item then close the dialog UI and free the _deleteItem variable
                 _items = ItemsService.Delete(_deleteItem.Id);
                 _showDeleteItemDialog = false;
                 _deleteItem = null;

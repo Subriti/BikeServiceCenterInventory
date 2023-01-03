@@ -32,12 +32,19 @@ public static class ItemsService
 
     public static List<Items> Create(Guid userId, string itemName, int quantity)
     {
-        if (quantity < 1)
+        List<Items> items = GetAll();
+        var itemNameExists = items.Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
+
+        if (itemNameExists)
         {
-            throw new Exception("Quantity must be minimum of 1 to add item");
+            throw new Exception("Item already exists in the inventory.");
         }
 
-        List<Items> items = GetAll();
+        if (quantity < 1)
+        {
+            throw new Exception("Quantity of items must be minimum of 1 to be added");
+        }
+
         items.Add(new Items
         {
             ItemName = itemName,
@@ -82,11 +89,17 @@ public static class ItemsService
 
         if (quantity < 1)
         {
-            throw new Exception("Quantity must be minimum of 1 to add item");
+            throw new Exception("Quantity of items must be minimum of 1");
         }
 
         if (itemToUpdate.ItemName != itemName)
         {
+            var itemNameExists = items.Any(t => t.ItemName.ToLower().Equals(itemName.ToLower()));
+            if (itemNameExists)
+            {
+                throw new Exception("Item with this name already exists in the inventory.");
+            }
+
             //on edit, updating all the existing logs with the new item name
             InventoryLogService.UpdateItemName(itemToUpdate.ItemName, itemName);
 
