@@ -35,6 +35,7 @@
         {
             if (lastUser.LoggedOut == "Unavailable")
             {
+                //if the admin was logged in, set currentUser to the admin details and navigate to inventory
                 _globalState.CurrentUser = user;
                 NavManager.NavigateTo("/inventory");
             }
@@ -45,6 +46,7 @@
     {
        if (_globalState.CurrentUser.Role == Role.Admin)
         {
+            //if the user is admin, set logout date
             AdminLoginService.LogOut(_globalState.CurrentUser.Id);
         }
         _globalState.CurrentUser = null;

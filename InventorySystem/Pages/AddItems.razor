@@ -60,17 +60,19 @@
             IEnumerable<Items> itemList = _items;
             if (_sortBy == "itemName")
             {
-                  //sorting the data and storing into the itemList
+                  //sorting the data by itemName and storing into the itemList
                 itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.ItemName) : itemList.OrderByDescending(t =>
                 t.ItemName);
             }
             else if (_sortBy == "quantity")
             {
+                //sorting the data by quantity and storing into the itemList
                 itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.Quantity) : itemList.OrderByDescending(t =>
                 t.Quantity);
             }
             else if (_sortBy == "createdAt")
             {
+                //sorting the data by createdAt and storing into the itemList
                 itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.CreatedAt) : itemList.OrderByDescending(t =>
                 t.CreatedAt);
             }
@@ -119,7 +121,9 @@
     </tbody>
 </table>
 
-@*for displaying form for adding/editing the item in the inventory*@
+@*for displaying form for adding/editing the item in the inventory
+   it is called after the OpenEditItemDialog initialises the dialog details and its model
+*@
 @if (_showEditItemDialog)
 {
     <ModalDialog Title="@_dialogTitle" OnClose="@OnEditItemDialogClose" OkLabel="@_dialogOkLabel">
@@ -153,6 +157,7 @@
 }
 
 @code {
+    //Global variables that can be accessed from anywhere in the class
     [CascadingParameter]
     private GlobalState _globalState { get; set; }
     private bool _showEditItemDialog { get; set; }

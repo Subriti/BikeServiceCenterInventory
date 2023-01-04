@@ -2,12 +2,15 @@
 
 <nav class="navbar navbar-light bg-light justify-content-between">
     <h1 class="navbar-brand mb-0 h1">Users</h1>
+
+    @* OpenAddUserDialog displays dialog box for adding the user and binding the required data*@
     <button class="btn btn-primary" type="button" @onclick="OpenAddUserDialog">
         <span class="oi oi-plus" /> Add
     </button>
 </nav>
 <br />
 
+@*Creating a table and defining its row and headers*@
 <table class="table">
     <thead>
         <tr>
@@ -19,21 +22,27 @@
         </tr>
     </thead>
     <tbody>
+
+         @*looping over each item in the _users to display each data*@
         @foreach (var user in _users)
         {
             <tr class="p-2 bg-light border">
                 <td>@user.Username</td>
                 <td>@user.Role.ToString()</td>
+                 @*changing the display format for the DateTime*@
                 <td>@user.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</td>
                 <td>
                     @{
+                        //finding creator of the user by Id and displaying their username
                         var creator = UsersService.GetById(user.CreatedBy);
                         <span>@(creator == null ? "Unknown" : creator.Username)</span>
                     }
                 </td>
                 <td>
+                    @*disabling the delete button for the current user*@
                     <button disabled="@(_globalState.CurrentUser != null ? _globalState.CurrentUser.Id == user.Id : false)"
                         class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteUserDialog(user)">
+                        @*OpenDeleteUserDialog helps assign the dialog title and binds the userId for deletion*@
                         <span class="oi oi-delete" /> Delete
                     </button>
                 </td>
@@ -42,9 +51,13 @@
     </tbody>
 </table>
 
+@*for displaying form for adding the users to the system
+   it is called after the OpenAddUserDialog initialises the dialog details and its model
+*@
 @if (_showAddUserDialog)
 {
     <ModalDialog Title="Add User" OnClose="@OnAddUserDialogClose" OkLabel="Add">
+        @*OnClose denotes what to be done with the captured data*@
         <form>
             <div class="form-floating mb-2">
                 <input type="text" class="form-control username" @bind="_username" placeholder="Username" />
@@ -72,10 +85,11 @@
     </ModalDialog>
 }
 
+@*for displaying the dialog box to confirm deleting of the user in the system*@
 @if (_showDeleteUserDialog)
 {
     <ModalDialog Title="Delete User" OnClose="@OnDeleteUserDialogClose" OkLabel="Confirm">
-        <p>Are you sure you want to delete <strong>@_deleteUser.Username</strong> user and their data?</p>
+        <p>Are you sure you want to delete user <strong>@_deleteUser.Username</strong>?</p>
         @if (!string.IsNullOrEmpty(_deleteUserErrorMessage))
         {
             <AlertMessage Type="danger" Message="@_deleteUserErrorMessage" />
@@ -84,6 +98,7 @@
 }
 
 @code {
+    //Global variables that can be accessed from anywhere in the class
     [CascadingParameter]
     private GlobalState _globalState { get; set; }
     private List<User> _users { get; set; }
@@ -101,6 +116,7 @@
         _users = UsersService.GetAll();
     }
 
+    //for displaying dialog box for adding the user into the system and binding the required data
     private void OpenAddUserDialog()
     {
         _showAddUserDialog = true;
@@ -108,6 +124,8 @@
         _password = "";
         _role = Role.Staff;
     }
+
+    @* denotes what to be done with the captured data when the form was submitted *@
     private void OnAddUserDialogClose(bool isCancel)
     {
         if (isCancel)
@@ -120,7 +138,10 @@
             try
             {
                 _addUserErrorMessage = "";
+                //create the user and save to the JSON file
                 _users = UsersService.Create(_globalState.CurrentUser.Id, _username, _password, _role);
+
+                //on success, close the dialog UI
                 _showAddUserDialog = false;
             }
             catch (Exception e)
@@ -130,17 +151,21 @@
         }
     }
 
+    //on input recieved on the radio button, assign _role to the value selected
     private void RoleChangeHandler(ChangeEventArgs e)
     {
         _role = (Role)Enum.Parse(typeof(Role), e.Value.ToString());
     }
 
+    //for binding the data for deletion and then displaying the dialog in the UI
     private void OpenDeleteUserDialog(User user)
     {
         _deleteUser = user;
         _showDeleteUserDialog = true;
     }
 
+
+    @* denotes what to be done when the deletion was confirmed *@
     private void OnDeleteUserDialogClose(bool isCancel)
     {
         if (isCancel)
@@ -154,6 +179,7 @@
             try
             {
                 _deleteUserErrorMessage = "";
+                //delete the user then close the dialog UI and free the _deleteUser variable
                 _users = UsersService.Delete(_deleteUser.Id);
                 _showDeleteUserDialog = false;
                 _deleteUser = null;

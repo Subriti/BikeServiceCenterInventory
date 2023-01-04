@@ -1,0 +1,43 @@
+﻿table {
+    border-spacing: 15px;
+}
+
+th {
+    background-color: lightblue;
+    padding: 10px;
+    text-align: center;
+}
+
+td {
+    background-color: lightgrey;
+    padding: 10px;
+    text-align: center;
+}
+
+.legend {
+    list-style: none;
+    position: absolute;
+    margin-top: -270px;
+    margin-left: 200px;
+    transform: rotate(-90deg);
+    perspective: 100px;
+}
+
+    .legend li {
+        float: left;
+        margin-right: 10px;
+    }
+
+    .legend span {
+        border-radius: 50px;
+        border: 1px solid #ccc;
+        float: left;
+        width: 12px;
+        height: 14px;
+        margin: 2px;
+        margin-top: 3px;
+    }
+
+    .legend .itemsTaken {
+        background-color: #2979FF;
+    }

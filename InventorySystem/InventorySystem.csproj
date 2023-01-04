@@ -67,6 +67,7 @@
     <ItemGroup>
       <Content Remove="Pages\Inventory.razor" />
       <Content Remove="Pages\LoginPage.razor.razor" />
+      <Content Remove="Pages\StockRecords.razor.razor" />
       <Content Remove="Shared\SurveyPrompt.razor" />
       <Content Remove="wwwroot\images\img1.jpg" />
     </ItemGroup>

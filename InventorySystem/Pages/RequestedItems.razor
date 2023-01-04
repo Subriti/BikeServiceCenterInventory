@@ -15,7 +15,7 @@
     </p>
 
     @* OpenAddItemDialog displays dialog box for adding the item log and binding the required data*@
-    <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog">
+    <button class="btn btn-primary" type="button" @onclick="OpenAddItemLogDialog">
         <span class="oi oi-wrench" /> Request
     </button>
 </nav>
@@ -88,27 +88,31 @@
 
             if (_sortBy == "itemName")
             {
-                //sorting the data and storing into the inventoryLogList
+                //sorting the data by itemName and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.ItemName) : inventoryLogList.OrderByDescending(t =>
                 t.ItemName);
             }
             else if (_sortBy == "quantity")
             {
+                //sorting the data by quantity and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.Quantity) : inventoryLogList.OrderByDescending(t =>
                 t.Quantity);
             }
             else if (_sortBy == "approvedBy")
             {
+                //sorting the data by ApprovedBy and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.ApprovedBy) : inventoryLogList.OrderByDescending(t =>
                 t.ApprovedBy);
             }
             else if (_sortBy == "takenBy")
             {
+                //sorting the data by TakenBy and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.TakenBy) : inventoryLogList.OrderByDescending(t =>
                 t.TakenBy);
             }
             else if (_sortBy == "takenOutAt")
             {
+                //sorting the data by TakenOutAt and storing into the inventoryLogList
                 inventoryLogList = _sortDirection == "ascending" ? inventoryLogList.OrderBy(t => t.TakenOutAt) : inventoryLogList.OrderByDescending(t =>
                 t.TakenOutAt);
             }
@@ -128,6 +132,7 @@
                     <td>@itemLog.TakenBy</td>
                     <td>
                         <p class="small mb-0">
+                            @*changing the display format for the DateTime*@
                             @itemLog.TakenOutAt.ToString("MMM dd, yyyy h:mm tt")
                         </p>
                     </td>
@@ -137,7 +142,9 @@
     </tbody>
 </table>
 
-@*for displaying form for adding the item log*@
+@*for displaying form for adding the item log
+   it is called after the OpenAddItemLogDialog initialises the dialog details and its model
+*@
 @if (_showAddItemLogDialog)
 {
     <ModalDialog Title="@_dialogTitle" OnClose="@OnAddItemLogDialogClose" OkLabel="@_dialogOkLabel">
@@ -161,6 +168,7 @@
 }
 
 @code {
+    //Global variables that can be accessed from anywhere in the class
     [CascadingParameter]
     private GlobalState _globalState { get; set; }
     private bool _showAddItemLogDialog { get; set; }
@@ -253,7 +261,7 @@
     }
 
     //for displaying dialog box for adding the item log and binding the required data
-    private void OpenAddItemDialog()
+    private void OpenAddItemLogDialog()
     {
         _dialogTitle = "Item Requests";
         _dialogOkLabel = "Add";

@@ -7,6 +7,7 @@ namespace InventorySystem.Data
 
         private const char _segmentDelimiter = ':';
 
+        //Hashing the password by adding salt
         public static string HashSecret(string input)
         {
             var saltSize = 16;
@@ -25,6 +26,7 @@ namespace InventorySystem.Data
             );
         }
 
+        //verifying if two entered values have the same hash; the entered password during login and the one stored in the JSON file
         public static bool VerifyHash(string input, string hashString)
         {
             string[] segments = hashString.Split(_segmentDelimiter);
@@ -43,26 +45,31 @@ namespace InventorySystem.Data
             return CryptographicOperations.FixedTimeEquals(inputHash, hash);
         }
 
+        //specifying the location to store the JSON folder
         public static string GetJSONfilePath()
         {
             return @"C:\Users\Subriti\C#_Coursework\";
         }
 
+        //specifying the name and location for storing User data
         public static string GetAppUsersFilePath()
         {
             return Path.Combine(GetJSONfilePath(), "users.json");
         }
 
+        //specifying the name and location for storing Items data
         public static string GetItemsFilePath()
         {
             return Path.Combine(GetJSONfilePath(), "items.json");
         }
 
+        //specifying the name and location for storing Inventory Log data
         public static string GetInventoryLogFilePath()
         {
             return Path.Combine(GetJSONfilePath(), "inventoryLog.json");
         }
 
+        //specifying the name and location for storing Admin Login details
         public static string GetAdminLoginFilePath()
         {
             return Path.Combine(GetJSONfilePath(), "adminLogin.json");
