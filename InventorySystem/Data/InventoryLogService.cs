@@ -84,7 +84,7 @@ public static class InventoryLogService
     //storing all the months in a list for populating the drop down with options
     public static List<String> GetMonths()
     {
-        List<String> months= new List<String>() {"January","February","March","April","May","June","July","August","September","October","November","December"};
+        List<String> months = new List<String>() { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
         return months;
     }
 
@@ -123,13 +123,21 @@ public static class InventoryLogService
         }
 
 
-        //checking if the item exists in the inventory; .Any returns bool
-        var itemNameExists = ItemsService.GetAll().Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
-
-        if (!itemNameExists)
+        if (itemName != null)
         {
-            throw new Exception("The item " + itemName + " does not exist in the inventory");
+            //checking if the item exists in the inventory; .Any returns bool
+            var itemNameExists = ItemsService.GetAll().Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
+
+            if (!itemNameExists)
+            {
+                throw new Exception("The item " + itemName + " does not exist in the inventory");
+            }
         }
+        else
+        {
+            throw new Exception("Please fill in the item name.");
+        }
+
 
         if (quantity < 1)
         {
@@ -143,13 +151,22 @@ public static class InventoryLogService
             throw new Exception("Requested quantity is currently unavailable.");
         }
 
-        //checking if the user exists in the system; .Any returns bool
-        bool userNameExists = UsersService.GetAll().Any(x => x.Username == takenBy);
 
-        if (!userNameExists)
+        if (takenBy != null)
         {
-            throw new Exception("The user " + takenBy + " does not exist in the system");
+            //checking if the user exists in the system; .Any returns bool
+            bool userNameExists = UsersService.GetAll().Any(x => x.Username == takenBy);
+
+            if (!userNameExists)
+            {
+                throw new Exception("The user " + takenBy + " does not exist in the system");
+            }
         }
+        else
+        {
+            throw new Exception("Please fill in the staff name.");
+        }
+
 
         List<InventoryLog> itemLog = GetAll();
 
@@ -180,7 +197,7 @@ public static class InventoryLogService
         List<InventoryLog> logs = GetAll();
 
         //looping over the whole list
-        foreach(var itemLog in logs)
+        foreach (var itemLog in logs)
         {
             //checking if the existing logs contains the item name
             if (itemLog.ItemName.ToLower().Equals(previousItemName.ToLower()))

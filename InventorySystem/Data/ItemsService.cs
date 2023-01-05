@@ -42,12 +42,20 @@ public static class ItemsService
         //getting all items
         List<Items> items = GetAll();
 
-        //checking if item already exists
-        var itemNameExists = items.Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
-
-        if (itemNameExists)
+        if (itemName != null)
         {
-            throw new Exception("Item already exists in the inventory.");
+
+            //checking if item already exists
+            var itemNameExists = items.Any(t => t.ItemName.ToLower().Contains(itemName.ToLower()));
+
+            if (itemNameExists)
+            {
+                throw new Exception("Item already exists in the inventory.");
+            }
+        }
+        else
+        {
+            throw new Exception("Please fill in the item name.");
         }
 
         if (quantity < 1)
