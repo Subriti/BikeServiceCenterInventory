@@ -17,7 +17,7 @@ td {
 .legend {
     list-style: none;
     position: absolute;
-    margin-top: -270px;
+    margin-top: -240px;
     margin-left: 200px;
     transform: rotate(-90deg);
     perspective: 100px;

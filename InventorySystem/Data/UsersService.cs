@@ -69,7 +69,7 @@ namespace InventorySystem.Data
                 new User
                 {
                     Username = username,
-                    PasswordHash = Utils.HashSecret(password),
+                    PasswordHash = Utils.HashPassword(password),
                     Role = role,
                     CreatedBy = userId
                 }
@@ -170,7 +170,7 @@ namespace InventorySystem.Data
             }
 
             //hashing the user-written new password and then saving it to the JSON file
-            user.PasswordHash = Utils.HashSecret(newPassword);
+            user.PasswordHash = Utils.HashPassword(newPassword);
             SaveAll(users);
 
             return user;

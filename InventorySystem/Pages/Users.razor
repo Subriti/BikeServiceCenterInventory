@@ -35,7 +35,7 @@
                     @{
                         //finding creator of the user by Id and displaying their username
                         var creator = UsersService.GetById(user.CreatedBy);
-                        <span>@(creator == null ? "Unknown" : creator.Username)</span>
+                        <span>@(creator == null ? "System" : creator.Username)</span>
                     }
                 </td>
                 <td>

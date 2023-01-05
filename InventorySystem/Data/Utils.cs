@@ -8,7 +8,7 @@ namespace InventorySystem.Data
         private const char _segmentDelimiter = ':';
 
         //Hashing the password by adding salt
-        public static string HashSecret(string input)
+        public static string HashPassword(string input)
         {
             var saltSize = 16;
             var iterations = 100_000;

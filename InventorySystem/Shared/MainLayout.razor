@@ -29,15 +29,17 @@
         //checking if admin was logged in before the re-run of program
         List<AdminLoginDetails> loginDetails = AdminLoginService.GetAll();
         var lastUser = loginDetails.LastOrDefault();
-
-        var user = UsersService.GetById(lastUser.Id);
-        if (user.Role == Role.Admin)
+        if (lastUser != null)
         {
-            if (lastUser.LoggedOut == "Unavailable")
+            var user = UsersService.GetById(lastUser.Id);
+            if (user.Role == Role.Admin)
             {
-                //if the admin was logged in, set currentUser to the admin details and navigate to inventory
-                _globalState.CurrentUser = user;
-                NavManager.NavigateTo("/inventory");
+                if (lastUser.LoggedOut == "Unavailable")
+                {
+                    //if the admin was logged in, set currentUser to the admin details and navigate to inventory
+                    _globalState.CurrentUser = user;
+                    NavManager.NavigateTo("/inventory");
+                }
             }
         }
     }
