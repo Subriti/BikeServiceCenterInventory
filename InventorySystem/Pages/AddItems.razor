@@ -28,39 +28,39 @@
                 </div>
             </th>
 
-            <th>
-                <div class="d-flex">
-                    Added At
-                    <a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+            @*making the add items button and other details available only to the admin*@
+            @if (UserRole == Role.Admin)
+            {
+                <th>
+                    <div class="d-flex">
+                        Added At
+                        <a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
                        @onclick='()=>SortByHandler("createdAt")'>
-                        <span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")' />
-                    </a>
-                </div>
-            </th>
-            <th>
-                <div class="d-flex mb-3">
-                    Last Taken out on
-                </div>
-            </th>
-            <th>
-                @*making the add items button available only to the admin*@
-                @if (UserRole == Role.Admin)
-                {
+                            <span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")' />
+                        </a>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-flex mb-3">
+                        Last Taken out on
+                    </div>
+                </th>
+                <th>
                     <button class="btn btn-primary" type="button" @onclick="OpenAddItemDialog" style="float:right;">
                         <span class="oi oi-plus" /> Add Items
                     </button>
-                }
-            </th>
+                </th>
+            }
         </tr>
     </thead>
     <tbody>
         @{
 
-             //initialising itemList with all the JSON data
+            //initialising itemList with all the JSON data
             IEnumerable<Items> itemList = _items;
             if (_sortBy == "itemName")
             {
-                  //sorting the data by itemName and storing into the itemList
+                //sorting the data by itemName and storing into the itemList
                 itemList = _sortDirection == "ascending" ? itemList.OrderBy(t => t.ItemName) : itemList.OrderByDescending(t =>
                 t.ItemName);
             }
@@ -85,26 +85,28 @@
 
                     <td>@itemItem.ItemName</td>
                     <td>@itemItem.Quantity</td>
-                    <td>
-                        <p class="small mb-0">
-                            @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
-                        </p>
-                    </td>
-                    <td>
-                        @*if item is just added, display last taken at to be unavailable*@
-                        @if (itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") == "Jan 01, 0001 12:00 AM")
-                        {
-                            <p class="small mb-0">-- Unavailable --</p>
-                        }
-                        else
-                        {
-                            <p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p>
-                        }
-                    </td>
-                    <td>
-                        @*making the edit and delete button available only to the admin*@
-                        @if (UserRole == Role.Admin)
-                        {
+
+
+                    @*making the edit and delete button available only to the admin; also other item relating data*@
+                    @if (UserRole == Role.Admin)
+                    {
+                        <td>
+                            <p class="small mb-0">
+                                @itemItem.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                            </p>
+                        </td>
+                        <td>
+                            @*if item is just added, display last taken at to be unavailable*@
+                            @if (itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") == "Jan 01, 0001 12:00 AM")
+                            {
+                                <p class="small mb-0">-- Unavailable --</p>
+                            }
+                            else
+                            {
+                                <p class="small mb-0">@itemItem.LastTakenAt.ToString("MMM dd, yyyy h:mm tt") </p>
+                            }
+                        </td>
+                        <td>
                             <button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditItemDialog(itemItem)">
                                 @*OpenEditItemDialog helps assign the dialog title and set the field for edit in accordance with a Object model*@
                                 <span class="oi oi-pencil" /> Edit
@@ -112,8 +114,8 @@
                             <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(itemItem)">
                                 <span class="oi oi-delete" /> Delete
                             </button>
-                        }
-                    </td>
+                        </td>
+                    }
 
                 </tr>
             }
